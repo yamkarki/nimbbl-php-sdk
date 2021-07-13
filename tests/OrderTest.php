@@ -12,11 +12,10 @@ final class OrderTest extends TestCase
 {
     public function testRetrieveOne(): void
     {
-        $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
+        $api = new NimbblApi('access_key_1MwvMkKkweorz0ry1', 'access_secret_81x7ByYkRpB4g05N');
 
         $orderId = 'order_x47oddEGREZ8ZvLa';
         $order = $api->order->retrieveOne($orderId);
-
         $this->assertEmpty($order->error);
         $this->assertEquals($order->order_id, $orderId);
     }
@@ -72,7 +71,6 @@ final class OrderTest extends TestCase
             'description' => 'This is a test order...',
         );
         $newOrder = $api->order->create($order_data);
-
         $this->assertEmpty($newOrder->error);
     }
 }

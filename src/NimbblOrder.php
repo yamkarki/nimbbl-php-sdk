@@ -4,6 +4,7 @@ namespace Nimbbl\Api;
 
 use JsonSerializable;
 
+
 class NimbblOrder extends NimbblEntity implements JsonSerializable
 {
     public static function entityClass()
@@ -14,15 +15,6 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
     /**
      *  @param $id Customer id description
      */
-    public function retrieveOne($id)
-    {
-        $nimbblRequest = new NimbblRequest();
-        $oneEntity = $nimbblRequest->request('GET', 'orders/one/' . $id);
-        $loadedEntity = $this->fillOne($oneEntity);
-        $this->attributes = $loadedEntity->attributes;
-        $this->error = $loadedEntity->error;
-        return $this;
-    }
 
     public function retrieveMany($options = array())
     {
@@ -44,21 +36,74 @@ class NimbblOrder extends NimbblEntity implements JsonSerializable
     public function create($attributes = array())
     {
         $nimbblRequest = new NimbblRequest();
-        $createdEntity = $nimbblRequest->request('POST', 'v2/create-order', $attributes);
+        $nimbblSegment = new NimbblSegment();
+        $nimbblSegment->track(array(
+            [
+                "userId" => NimbblApi::getKey(),
+                "event" => "Order Submitted",
+                "properties" => [
+                  "invoice_id" => NimbblApi::getKey(),
+                  "amount" => "success",
+                  "merchant_id" => 'php-sdk',
+                  "merchant_name" => '1',
+                  "kit_name" => 'psp-sdk',
+                  'kit_version' => 1
+                ],
+            ],
+        ));
 
+        $createdEntity = $nimbblRequest->request('POST', 'v2/create-order', $attributes);
+        
         $newCreatedEntity = new NimbblOrder();
         if (key_exists('error', $createdEntity)) {
             $newCreatedEntity->error = $createdEntity['error'];
         }
         else {
+            $nimbblSegment->track(array(
+                [
+                    "userId" => NimbblApi::getKey(),
+                    "event" => "Order Recieved",
+                    "properties" => [
+                      "invoice_id" => $createdEntity['user']['user_id'],
+                      "amount" => "success",
+                      "merchant_id" => 'php-sdk',
+                      "merchant_name" => '1',
+                      "kit_name" => 'psp-sdk',
+                      'kit_version' => 1
+                    ],
+                ],
+            ));
             $attributes = array();
             foreach ($createdEntity as $key => $value) {
                 $attributes[$key] = $value;
             }
             $newCreatedEntity->attributes = $attributes;
+            
+            $nimbblSegment->track(array(
+                [
+                    "user_id" => NimbblApi::getKey(),
+                    "event" => "Authorization Received",
+                    "properties" => [
+                      "access_key" => NimbblApi::getKey(),
+                      "auth_status" => "success",
+                      "kit_name" => 'php-sdk',
+                      "kit_version" => '1'
+                    ],
+                ],
+            ));
         }
 
         return $newCreatedEntity;
+    }
+
+    public function retrieveOne($id)
+    {
+        $nimbblRequest = new NimbblRequest();
+        $oneEntity = $nimbblRequest->request('GET', 'v2/get-order/' . $id);
+        $loadedEntity = $this->fillOne($oneEntity);
+        $this->attributes = $loadedEntity->attributes;
+        $this->error = $loadedEntity->error;
+        return $this;
     }
 
     public function edit($attributes = null)

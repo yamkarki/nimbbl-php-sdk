@@ -60,14 +60,51 @@ class NimbblRequest
     public function request($method, $url, $data = array())
     {
         $url = NimbblApi::getFullUrl($url);
+        
+        $hooks = new Requests_Hooks();
+
+        $hooks->register('curl.before_send', array($this, 'setCurlSslOpts'));
+
+        $nimbblToken = new NimbblToken();
+
+        $nimbblToken->generateToken();
+
+        print(json_encode($nimbblToken));
+
+        // TODO: FIXME instead of using normal auth we have to use token auth.
+        $options = [
+            'hook' => $hooks,
+            'timeout' => 60,
+        ];
+
+        $headers = $this->getRequestHeaders();
+        $headers['Authorization'] = 'Bearer ' . $geneartedKey->attributes['token'];
+
+        if (strtolower($method) === 'post') {
+            $data = json_encode($data);
+        }
+
+        $response = Requests::request($url, $headers, $data, $method, $options);
+
+        // $this->checkErrors($response);
+
+        return json_decode($response->body, true);
+        
+
+        // TODO: FIXME instead of using normal auth we have to use token auth.
+        
+    }
+
+    public function universalRequest($method, $url, $data = array())
+    {
+        $url = NimbblApi::getFullUrl($url);
 
         $hooks = new Requests_Hooks();
 
         $hooks->register('curl.before_send', array($this, 'setCurlSslOpts'));
 
-        $tokenResponse = Requests::post(NimbblApi::getTokenEndpoint(), ['Content-Type' => 'application/json'], json_encode(['access_key' => NimbblApi::getKey(), 'access_secret' => NimbblApi::getSecret()]));
-        $tokenResponseBody = json_decode($tokenResponse->body, true);
-
+        $nimbblKey = md5(NimbblApi::getToken());
+        $sub_merchant = NimbblApi::getMerchantId();
         // TODO: FIXME instead of using normal auth we have to use token auth.
         $options = [
             // 'auth' => new NimbblAuth($tokenResponseBody['token']),
@@ -76,7 +113,8 @@ class NimbblRequest
         ];
 
         $headers = $this->getRequestHeaders();
-        $headers['Authorization'] = 'Bearer ' . $tokenResponseBody['token'];
+        $headers['Authorization'] = 'Bearer ' . NimbblApi::getToken();
+        $headers['x-nimbbl-key'] = $sub_merchant . '-' . $nimbblKey;
 
         if (strtolower($method) === 'post') {
             $data = json_encode($data);

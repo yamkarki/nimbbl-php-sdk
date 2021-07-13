@@ -4,11 +4,15 @@ namespace Nimbbl\Api;
 
 class NimbblApi
 {
-    protected static $baseUrl = 'https://api.nimbbl.tech/api/';
+    protected static $baseUrl = 'https://uatapi.nimbbl.tech/api/';
 
     protected static $key;
 
     protected static $secret;
+
+    protected static $token;
+
+    protected static $merchantId;
 
     /*
      * App info is to store the Plugin/integration
@@ -98,5 +102,23 @@ class NimbblApi
     public static function getFullUrl($relativeUrl)
     {
         return self::getBaseUrl() . $relativeUrl;
+    }
+
+    public static function setToken($token){
+        self::$token = $token;
+        return true;
+    }
+
+    public static function getToken(){
+        return self::$token;
+    }
+
+    public static function setMerchantId($merchantId){
+        self::$merchantId = $merchantId;
+        return true;
+    }
+
+    public static function getMerchantId(){
+        return self::$merchantId;
     }
 }

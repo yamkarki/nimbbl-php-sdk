@@ -26,10 +26,13 @@ class NimbblUser extends NimbblEntity implements JsonSerializable
 
     public function retrieveMany($options = array())
     {
+        $nimbblToken = new NimbblToken();
+        $nimbblToken->generateToken();
+        
         $f = base64_encode($this->buildHttpQuery($options));
         $nimbblRequest = new NimbblRequest();
         $manyEntities = $nimbblRequest->request('GET', 'users/many?f=' . $f . '&pt=no');
-
+        print(json_encode($manyEntities));
         $users = array();
         foreach ($manyEntities['items'] as $idx => $oneEntity) {
             $users[] = $this->fillOne($oneEntity);

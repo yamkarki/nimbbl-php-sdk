@@ -10,33 +10,32 @@ use Nimbbl\Api\NimbblOrder;
 
 final class UserTest extends TestCase
 {
-    public function testRetrieveOneById(): void
-    {
-        $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
+    // public function testRetrieveOneById(): void
+    // {
+    //     $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
 
-        $userId = 138;
-        $user = $api->user->retrieveOne($userId);
+    //     $userId = 138;
+    //     $user = $api->user->retrieveOne($userId);
 
-        $this->assertEmpty($user->error);
-        $this->assertEquals($user->id, $userId);
-    }
+    //     $this->assertEmpty($user->error);
+    //     $this->assertEquals($user->id, $userId);
+    // }
 
-    public function testRetrieveOneByUserId(): void
-    {
-        $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
+    // public function testRetrieveOneByUserId(): void
+    // {
+    //     $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
 
-        $userId = 'user_RoQ7Z5QXg6zqy0rg';
-        $user = $api->user->retrieveOne($userId);
+    //     $userId = 'user_RoQ7Z5QXg6zqy0rg';
+    //     $user = $api->user->retrieveOne($userId);
 
-        $this->assertEmpty($user->error);
-        $this->assertEquals($user->user_id, $userId);
-    }
+    //     $this->assertEmpty($user->error);
+    //     $this->assertEquals($user->user_id, $userId);
+    // }
 
     public function testRetrieveMany(): void
     {
         $api = new NimbblApi('access_key_1MwvMkKkweorz0ry', 'access_secret_81x7ByYkRpB4g05N');
         $manyUsers = $api->user->retrieveMany();
-
         $this->assertEquals(sizeof($manyUsers['items']), 20);
     }
 }
